@@ -1,6 +1,13 @@
 import { ContextAndPlayLoad, FlowDefRepository, TaskType } from "./flowdef.mjs";
 import { Flow } from "./flow.mjs";
-import {flowDefsJson} from "./myflowdef.mjs";
+import { findAllFlowDef } from "./repository.mjs";
+// import {flowDefsJson} from "./myflowdef.mjs";
+async function loadJson() {
+  const response = await fetch('../../data/flowdef/fd_mo');
+  const info = await response.json();
+  console.log(info);
+  return info;
+}
 function hash(str) {
   var hash = 0,
     i, chr;
@@ -16,7 +23,7 @@ function hash(str) {
 // Flow definition
 /** @type {Flow} */
 var flow;
-function main() {  
+function main() {
   const flowDefRepository = FlowDefRepository.createFromJsonObject(flowDefsJson);
   const flowDef = flowDefRepository.findById("fd_mo");
   // フローを開始する
@@ -91,7 +98,7 @@ async function updateFlowView() {
 
 
 
-
+const flowDefsJson = await findAllFlowDef();
 main();
 setInterval(updateFlowView, 1000);
 const mermaid = window.mermaid || {};
