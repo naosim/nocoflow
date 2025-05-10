@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/xxjapp/xdialog@3/xdialog.min.css">
+<script src="https://cdn.jsdelivr.net/gh/xxjapp/xdialog@3/xdialog.min.js"></script>
+<script src="./js/mermaid.min.js"></script>
+<div id="app">
+  <pre><code id="code"></code></pre>
+</div>
+
+<pre id="mermaid" class="mermaid">
+  graph TD
+  A[Client] --> B[Load Balancer]
+  B --> C[Server01]
+  B --> D[Server02]
+</pre>
+
+
+<script type="module" src="./js/main.mjs"></script>
