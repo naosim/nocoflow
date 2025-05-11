@@ -19,7 +19,9 @@ class DomainType {
   static payload = new DomainType("payload");
   static flow = new DomainType("flow");
   static flowdef = new DomainType("flowdef");
-  static all = [DomainType.context, DomainType.payload, DomainType.flow, DomainType.flowdef];
+  static contextdef = new DomainType("contextdef");
+  static payloaddef = new DomainType("payloaddef");
+  static all = [DomainType.context, DomainType.payload, DomainType.flow, DomainType.flowdef, DomainType.contextdef, DomainType.payloaddef];
   static isValid(type: string): boolean {
     return DomainType.all.some((t) => t.value === type);
   }
@@ -34,7 +36,7 @@ async function setup() {
     await fs.mkdir(dirPath, { recursive: true });
   }
   DomainType.all.map(v => v.value).forEach(async (type) => {
-    const contextDataPath = path.join(dirPath, `../data/${type}`);
+    const contextDataPath = path.join(dirPath, `./${type}`);
     if(!await directoryExists(contextDataPath)) {
       await fs.mkdir(contextDataPath, { recursive: true });
     }
@@ -54,7 +56,9 @@ fastify.get('/data/:domainType', async function handler (request, reply) {
   if(!DomainType.isValid(domainType)) {
     throw new Error("Invalid domain type");
   }
-  const p = path.join(__dirname, `../data/${domainType}/_list.json`);
+  const rootPahth = path.join(__dirname, '../');
+  const dataPath = path.join(rootPahth, config.dataPath);
+  const p = path.join(dataPath, `./${domainType}/_list.json`);
   if(!await fileExists(p)) {// ファイルがなかったら作成する
     writeJsonFile(p, []);
   }
@@ -66,7 +70,10 @@ fastify.get('/data/:domainType/:id', async function handler (request, reply) {
   if(!DomainType.isValid(domainType)) {
     throw new Error("Invalid domain type");
   }
-  const p = path.join(__dirname, `../data/${domainType}/${id}.json`);
+  const rootPahth = path.join(__dirname, '../');
+  const dataPath = path.join(rootPahth, config.dataPath);
+  const p = path.join(dataPath, `./${domainType}/${id.split(".json").join("")}.json`);
+  //const p = path.join(__dirname, `../data/${domainType}/${id}.json`);
   return readJsonFile(p);
 })
 
@@ -83,3 +90,8 @@ try {
   process.exit(1)
 }
 
+
+
+function loadDevData(path: string) {
+  console.log(path);
+}
