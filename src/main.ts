@@ -60,9 +60,16 @@ fastify.get('/data/:domainType', async function handler (request, reply) {
   const dataPath = path.join(rootPahth, config.dataPath);
   const p = path.join(dataPath, `./${domainType}/_list.json`);
   if(!await fileExists(p)) {// ファイルがなかったら作成する
-    writeJsonFile(p, []);
+    await writeJsonFile(p, []);
   }
-  return readJsonFile(p);
+  var result:any = null;
+  if(config.devMode) {
+    result = await loadDevData(p);
+  }
+  if(result == null) {
+    result =  await readJsonFile(p);
+  }
+  return result;
 })
 
 fastify.get('/data/:domainType/:id', async function handler (request, reply) {
@@ -74,7 +81,14 @@ fastify.get('/data/:domainType/:id', async function handler (request, reply) {
   const dataPath = path.join(rootPahth, config.dataPath);
   const p = path.join(dataPath, `./${domainType}/${id.split(".json").join("")}.json`);
   //const p = path.join(__dirname, `../data/${domainType}/${id}.json`);
-  return readJsonFile(p);
+  var result:any = null;
+  if(config.devMode) {
+    result = await loadDevData(p);
+  }
+  if(result == null) {
+    result =  await readJsonFile(p);
+  }
+  return result;
 })
 
 fastify.register(fastifyStatic, {
@@ -90,8 +104,98 @@ try {
   process.exit(1)
 }
 
+class Countup {
+  count = 1;
+  prefix: string;
+  zeroText = "000";
+  zeroLength = 3;
+  constructor(prefix: string) {
+    console.log("prefix", prefix);
+    this.prefix = prefix;
+  }
+  add() {
+    this.count++;
+    return this.prefix + (`${this.zeroText}${this.count}`).slice(-this.zeroLength);
+  }
+}
 
-
-function loadDevData(path: string) {
+async function loadDevData(path: string) {
   console.log(path);
+  if(path.indexOf("contextdef/_list.json") != -1) {
+    return [{"systemId":"contextdef"}];
+  }
+  if(path.indexOf("contextdef/contextdef.json") != -1) {
+    const countup = new Countup("ctd-c-");
+    return {
+      "_systemId":"contextdef",
+      "id":"issue",
+      "displayName":"課題",
+      "description":"課題の説明",
+      "columns":[
+        {
+          "_systemId":"ctd-c-systemId",
+          "id":"_systemId",
+          "type":"string",
+          "description":"システムID"
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"id",
+          "displayName":"タスクID",
+          "type":"string"
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"subject",
+          "displayName":"件名",
+          "type":"string",
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"detail",
+          "displayName":"内容",
+          "type":"string",
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"status",
+          "displayName":"ステータス",
+          "type":"string",
+          "enum": ["未着手", "対応中", "完了"]
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"result",
+          "displayName":"結果",
+          "type":"string",
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"createdBy",
+          "displayName":"起票者",
+          "type":"string",
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"assignedTo",
+          "displayName":"担当者",
+          "type":"string",
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"_createdAt",
+          "displayName":"作成日時",
+          "type":"Date"
+        },
+        {
+          "_systemId":countup.add(),
+          "id":"_updateAt",
+          "displayName":"更新日時",
+          "type":"Date"
+        },
+      ]
+    };
+  }
+  
+  return null;
 }

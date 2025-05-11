@@ -14,3 +14,9 @@ async function findAll(domainType) {
   console.log(result);
   return result;
 }
+
+export async function getContextDef() {
+  const r = await fetch(`../../data/contextdef/contextdef`);
+  const result = await r.json();
+  return result;
+}
