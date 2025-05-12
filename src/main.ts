@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 import fastifyStatic from '@fastify/static';
 import { directoryExists, fileExists, readJsonFile, writeJsonFile } from './lib.ts';
 import { config } from './config.ts';
+import { loadDevData } from './devdata.ts';
 class DomainType {
   value: string;
   constructor(value: string) {
@@ -102,100 +103,4 @@ try {
 } catch (err) {
   fastify.log.error(err)
   process.exit(1)
-}
-
-class Countup {
-  count = 1;
-  prefix: string;
-  zeroText = "000";
-  zeroLength = 3;
-  constructor(prefix: string) {
-    console.log("prefix", prefix);
-    this.prefix = prefix;
-  }
-  add() {
-    this.count++;
-    return this.prefix + (`${this.zeroText}${this.count}`).slice(-this.zeroLength);
-  }
-}
-
-async function loadDevData(path: string) {
-  console.log(path);
-  if(path.indexOf("contextdef/_list.json") != -1) {
-    return [{"systemId":"contextdef"}];
-  }
-  if(path.indexOf("contextdef/contextdef.json") != -1) {
-    const countup = new Countup("ctd-c-");
-    return {
-      "_systemId":"contextdef",
-      "id":"issue",
-      "displayName":"課題",
-      "description":"課題の説明",
-      "columns":[
-        {
-          "_systemId":"ctd-c-systemId",
-          "id":"_systemId",
-          "type":"string",
-          "description":"システムID"
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"id",
-          "displayName":"タスクID",
-          "type":"string"
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"subject",
-          "displayName":"件名",
-          "type":"string",
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"detail",
-          "displayName":"内容",
-          "type":"string",
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"status",
-          "displayName":"ステータス",
-          "type":"string",
-          "enum": ["未着手", "対応中", "完了"]
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"result",
-          "displayName":"結果",
-          "type":"string",
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"createdBy",
-          "displayName":"起票者",
-          "type":"string",
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"assignedTo",
-          "displayName":"担当者",
-          "type":"string",
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"_createdAt",
-          "displayName":"作成日時",
-          "type":"Date"
-        },
-        {
-          "_systemId":countup.add(),
-          "id":"_updateAt",
-          "displayName":"更新日時",
-          "type":"Date"
-        },
-      ]
-    };
-  }
-  
-  return null;
 }

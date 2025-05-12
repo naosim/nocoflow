@@ -3,11 +3,11 @@ export async function findAllFlowDef() {
 }
 
 async function findAll(domainType) {
-  const r = await fetch(`../../data/${domainType}`);
+  const r = await fetch(`../../data/${domainType}/_list.json`);
   const list = await r.json();
   const result = [];
   for(const item of list) {
-    const r2 = await fetch(`../../data/${domainType}/${item.id}`);
+    const r2 = await fetch(`../../data/${domainType}/${item._systemId}.json`);
     const flowDef = await r2.json();
     result.push(flowDef);
   }
@@ -16,7 +16,11 @@ async function findAll(domainType) {
 }
 
 export async function getContextDef() {
-  const r = await fetch(`../../data/contextdef/contextdef`);
+  const r = await fetch(`../../data/contextdef/contextdef.json`);
   const result = await r.json();
   return result;
+}
+
+export async function getAllContext() {
+  return await findAll('context');
 }
