@@ -92,6 +92,11 @@ fastify.get('/data/:domainType/:id', async function handler (request, reply) {
   return result;
 })
 
+fastify.post('/action/flow/:id', async function handler(request, reply) {
+  console.log(request.body);
+  return {flowId: "idid"};
+});
+
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, '../' + config.publicPath),
     prefix: '/public/',

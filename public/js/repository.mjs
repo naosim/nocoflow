@@ -24,3 +24,7 @@ export async function getContextDef() {
 export async function getAllContext() {
   return await findAll('context');
 }
+
+export async function getAllFlowDef() {
+  return await findAll('flowdef');
+}

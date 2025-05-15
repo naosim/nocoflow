@@ -162,6 +162,7 @@ const data:[string, Function][] = [
           "_id":"_description",
           "_displayName":"内容",
           "type":"string",
+          "inputType":"textarea",
           "mapping":"context._description"
         },
         {
@@ -170,6 +171,7 @@ const data:[string, Function][] = [
           "_displayName":"ステータス",
           "type":"string",
           "value":"未着手",
+          "enum": ["未着手", "対応中", "完了"],
           "mapping":"context._status"
         },
         {
