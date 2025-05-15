@@ -94,7 +94,9 @@ fastify.get('/data/:domainType/:id', async function handler (request, reply) {
 
 fastify.post('/action/flow/:id', async function handler(request, reply) {
   console.log(request.body);
-  return {flowId: "idid"};
+  // TODO contextを作る
+  // TODO flowを作る
+  return {contextId: "c-001", flowId: "f-001"};
 });
 
 fastify.register(fastifyStatic, {
