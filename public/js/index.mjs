@@ -1,4 +1,4 @@
-import { h, text, app } from "https://unpkg.com/hyperapp"
+import { h, text, app } from "./hyperapp.mjs"
 import {getContextDef} from "./repository.mjs"
 
 const topPage = ({title}) => 
