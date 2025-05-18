@@ -1,9 +1,9 @@
 import { findAllFlowDef, getContextDef, getAllContext, getAllFlowDef } from "./repository.mjs";
 
 const flowDefList = await getAllFlowDef();
-var createFlow = flowDefList.filter(v => v.type == 'create')[0];
-console.log(createFlow);
-var formItems = createFlow.forms.map(v => {
+var createFlowDef = flowDefList.filter(v => v.type == 'create')[0];
+console.log(createFlowDef);
+var formItems = createFlowDef.forms.map(v => {
   if(v.inputType == 'textarea') {
     return `<div id="${v._id}">${v._displayName}<textarea name="${v._id}"></textarea></div>`
   }
@@ -12,7 +12,8 @@ var formItems = createFlow.forms.map(v => {
 console.log(formItems);
 var html = `
 <h1>新規作成</h1>
-<form method="post" action="/action/flow/${createFlow._id}">
+<form method="post" action="/action/flow/${createFlowDef._id}">
+<input type="hidden" name="flowDefId" value="${createFlowDef._id}"></input>
 ${formItems.join('')}
 
 </form>
@@ -27,11 +28,11 @@ document.getElementById("submit").addEventListener('click', async () => {
   for (const [key, value] of formData.entries()) {
     data[key] = value.length > 0 ? value : null;
   }
-  const res = await fetch(`/action/flow/${createFlow._id}`, {
+  const res = await fetch(`/action/flow/${createFlowDef._id}`, {
     method:'post',
     body: JSON.stringify(data)
   })
-  console.log(data, await res.json());
-  // console.log(form.elements);
-  // console.log(Object.keys(form.elements))
+  const flow = await res.json();
+  console.log(data, flow);
+  location.href = `./flow.html?flowid=${flow.flowId}`
 })
