@@ -34,5 +34,5 @@ document.getElementById("submit").addEventListener('click', async () => {
   })
   const flow = await res.json();
   console.log(data, flow);
-  location.href = `./flow.html?flowid=${flow.flowId}`
+  location.href = `./flow.html?flowId=${flow._id}`
 })

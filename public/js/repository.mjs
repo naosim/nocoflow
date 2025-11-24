@@ -28,3 +28,21 @@ export async function getAllContext() {
 export async function getAllFlowDef() {
   return await findAll('flowdef');
 }
+
+export async function findFlow(flowId) {
+  const r = await fetch(`../../data/flow/${flowId}.json`);
+  const result = await r.json();
+  return result;
+}
+
+export async function findFlowDef(flowDefId) {
+  const r = await fetch(`../../data/flowdef/${flowDefId}.json`);
+  const result = await r.json();
+  return result;
+}
+
+export async function findContext(contextId) {
+  const r = await fetch(`../../data/context/${contextId}.json`);
+  const result = await r.json();
+  return result;
+}
