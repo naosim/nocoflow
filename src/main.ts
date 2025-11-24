@@ -2,7 +2,7 @@ import { Domain, DomainId, DomainRepository } from "./domain-layer/domain/domain
 import { Entity, EntityId } from "./domain-layer/entity/entity.ts";
 import { CurrentTimeFactory, IdFactory } from "./domain-layer/lib/lib.ts";
 import { UsecaseEntity, UsecaseEntityFactory, UsecaseEntityId, UsecaseFlow, UsecaseFlowId, UsecaseFlowRepository, UsecaseFlowTask, UsecaseFlowTaskId, UsecaseFlowTaskState } from "./domain-layer/usecase/usecase.ts";
-import { Context, UsecaseFlowApiName, UsecaseFlowDef, UsecaseFlowDefDecide, UsecaseFlowDefRepository, UsecaseFlowTaskDef, UsecaseFlowTaskDefId, UsecaseFlowTaskType } from "./domain-layer/usecasedef/usecasedef.ts";
+import { Context, UsecaseFlowApiName, UsecaseFlowDef, UsecaseFlowDefDecide, UsecaseFlowDefRepository, UsecaseFlowTaskDef, UsecaseFlowTaskDefDependency, UsecaseFlowTaskDefId, UsecaseFlowTaskType } from "./domain-layer/usecasedef/usecasedef.ts";
 
 
 class Repositories {
@@ -97,6 +97,7 @@ class Nocoflow {
   }
 
   loop() {
+    // ステートパターンにした方が良い
     const flows = this.repositories.usecaseFlowRepository.findAll().filter(v => v.hasAlreadyTask());
     for (const flow of flows) {
       const task = flow.alreadyTask();
@@ -105,11 +106,24 @@ class Nocoflow {
         this.repositories.usecaseFlowRepository.save(flow);
         const usecaseFlowDef = this.repositories.usecaseFlowDefRepository.find(flow.usecaseFlowDefId);
         const taskDef = usecaseFlowDef.findTaskDef(task.taskDefId);
+        console.log(taskDef.displayName);
+        const entity = flow.usecaseEntity.entityId ? this.repositories.findEntity(flow.usecaseEntity.entityId) : undefined;
+        const context = new Context(flow.usecaseEntity, entity);
         if (taskDef.funcInit) {
-          const entity = flow.usecaseEntity.entityId ? this.repositories.findEntity(flow.usecaseEntity.entityId) : undefined;
-          taskDef.funcInit(new Context(flow.usecaseEntity, entity));
+          taskDef.funcInit(context);
           task.state = UsecaseFlowTaskState.completed;
           console.log(task.id.value, 'completed');
+          this.repositories.usecaseFlowRepository.save(flow);
+        } else if (taskDef.funcFinalize) {
+          taskDef.funcFinalize(context);
+          task.state = UsecaseFlowTaskState.completed;
+          console.log(task.id.value, 'completed');
+          this.repositories.usecaseFlowRepository.save(flow);
+        }
+
+        if (task.state == UsecaseFlowTaskState.completed) {
+          const nextTaskDefs = usecaseFlowDef.findNextTaskDefs(task.taskDefId);
+          nextTaskDefs.map(v => flow.findByUsecaseFlowTaskDefId(v.id)).forEach(v => v.state = UsecaseFlowTaskState.already);
           this.repositories.usecaseFlowRepository.save(flow);
         }
       }
@@ -173,6 +187,8 @@ const taskDefs = [
   new UsecaseFlowTaskDef(
     new UsecaseFlowTaskDefId(repositories.idFactory.create('UFTD')),
     UsecaseFlowTaskType.initialize,
+    '初期化',
+    '初期化',
     (context: Context): UsecaseEntity => {
       return context.usecaseEntity;
     }
@@ -180,13 +196,26 @@ const taskDefs = [
   new UsecaseFlowTaskDef(
     new UsecaseFlowTaskDefId(repositories.idFactory.create('UFTD')),
     UsecaseFlowTaskType.finalize,
+    '最終化',
+    '最終化',
     undefined,
     (context: Context): Entity => {
       return new Entity(new EntityId(repositories.idFactory.create('E')), {});
     }
   ),
 ];
-const usecaseFlowDef = new UsecaseFlowDef(repositories.idFactory.create('UF'), new UsecaseFlowApiName('issue_new'), '課題新規', '課題新規', taskDefs);
+const taskDefDependencies = [
+  new UsecaseFlowTaskDefDependency(
+    taskDefs[0].id,
+    taskDefs[1].id,
+  ),
+];
+const usecaseFlowDef = new UsecaseFlowDef(
+  repositories.idFactory.create('UF'),
+  new UsecaseFlowApiName('issue_new'), '課題新規', '課題新規',
+  taskDefs,
+  taskDefDependencies
+);
 nocoflow.addUsecaseFlowDef(usecaseFlowDef);
 
 // usecaseFlowDef決定

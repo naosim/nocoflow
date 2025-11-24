@@ -60,6 +60,9 @@ export class UsecaseFlow {
   alreadyTask() {
     return this.tasks.find(task => task.state === UsecaseFlowTaskState.already);// 複数あっても1つ返す
   }
+  findByUsecaseFlowTaskDefId(taskDefId: UsecaseFlowTaskDefId): UsecaseFlowTask {
+    return valid(this.tasks.find(task => task.taskDefId.eqValue(taskDefId)));
+  }
 }
 export enum UsecaseFlowTaskState {
   pending,

@@ -28,6 +28,8 @@ export class UsecaseFlowTaskDef {
   constructor(
     public readonly id: UsecaseFlowTaskDefId,
     public readonly type: UsecaseFlowTaskType,
+    public readonly displayName: string,
+    public readonly description: string,
     public readonly funcInit?: (context: Context) => UsecaseEntity,
     public readonly funcFinalize?: (context: Context) => Entity,
   ) { }
@@ -53,6 +55,13 @@ export class UsecaseFlowDefRepository {
   }
 }
 
+export class UsecaseFlowTaskDefDependency {
+  constructor(
+    public readonly fromTaskDefId: UsecaseFlowTaskDefId,
+    public readonly toTaskDefId: UsecaseFlowTaskDefId,
+  ) { }
+}
+
 export class UsecaseFlowDef {
   constructor(
     public readonly id: string,
@@ -60,9 +69,13 @@ export class UsecaseFlowDef {
     public readonly displayName: string,
     public readonly description: string,
     public readonly taskDefs: UsecaseFlowTaskDef[],
+    public readonly taskDefDependencies: UsecaseFlowTaskDefDependency[],
   ) { }
   findTaskDef(taskDefId: UsecaseFlowTaskDefId): UsecaseFlowTaskDef {
     return valid(this.taskDefs.find(taskDef => taskDef.id.eqValue(taskDefId)));
+  }
+  findNextTaskDefs(taskDefId: UsecaseFlowTaskDefId): UsecaseFlowTaskDef[] {
+    return this.taskDefDependencies.filter(taskDefDependency => taskDefDependency.fromTaskDefId.eqValue(taskDefId)).map(taskDefDependency => this.findTaskDef(taskDefDependency.toTaskDefId));
   }
 }
 
